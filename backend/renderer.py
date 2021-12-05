@@ -1,4 +1,5 @@
 from pygame.sprite import LayeredUpdates
+from .contants import WIDTH, HEIGHT
 from pygame import display, SCALED
 
 
@@ -8,7 +9,7 @@ class Renderer:
     @classmethod
     def init(cls):
         cls.contenido = LayeredUpdates()
-        display.set_mode([1000, 600], SCALED)
+        display.set_mode([WIDTH, HEIGHT], SCALED)
 
     @classmethod
     def add_widget(cls, widget):

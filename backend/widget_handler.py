@@ -46,8 +46,9 @@ class WidgetHandler:
                 elif ev.key == K_RIGHT:
                     dx = +100
 
-        for widget in cls.contenido.sprites():
-            widget.move(dx, dy)
+        if dx or dy:
+            for widget in cls.contenido.sprites():
+                widget.move(dx, dy)
 
         cls.contenido.update()
 
