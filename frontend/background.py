@@ -26,21 +26,21 @@ class Background(BaseWidget):
 
     def move(self, dx=0, dy=0):
         if dx < 0:
-            if not self.chunks.get_sprites_at([WIDTH, 0]):
-                chunk_image = self.select_chunk(width=dx)
-                self.chunks.add(Chunk(self, chunk_image, right=WIDTH))
+            # if not self.chunks.get_sprites_at([WIDTH, 0]):
+            chunk_image = self.select_chunk(width=dx)
+            self.chunks.add(Chunk(self, chunk_image, right=WIDTH))
         if dx > 0:
-            if not self.chunks.get_sprites_at([-dx, 0]):
-                chunk_image = self.select_chunk(width=dx)
-                self.chunks.add(Chunk(self, chunk_image, left=0))
+            # if not self.chunks.get_sprites_at([-dx, 0]):
+            chunk_image = self.select_chunk(width=dx)
+            self.chunks.add(Chunk(self, chunk_image, left=0))
         if dy < 0:
-            if not self.chunks.get_sprites_at([0, HEIGHT]):
-                chunk_image = self.select_chunk(height=dy)
-                self.chunks.add(Chunk(self, chunk_image, bottom=HEIGHT))
+            # if not self.chunks.get_sprites_at([0, HEIGHT]):
+            chunk_image = self.select_chunk(height=dy)
+            self.chunks.add(Chunk(self, chunk_image, bottom=HEIGHT))
         if dy > 0:
-            if not self.chunks.get_sprites_at([0, -dy]):
-                chunk_image = self.select_chunk(height=dy)
-                self.chunks.add(Chunk(self, chunk_image, top=0))
+            # if not self.chunks.get_sprites_at([0, -dy]):
+            chunk_image = self.select_chunk(height=dy)
+            self.chunks.add(Chunk(self, chunk_image, top=0))
 
     def select_chunk(self, width=WIDTH, height=HEIGHT):
         w = abs(width)
