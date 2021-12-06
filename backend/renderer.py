@@ -23,7 +23,7 @@ class Renderer:
     def update(cls):
         fondo = display.get_surface()
         fondo.fill((0, 0, 0))
-        rect = cls.contenido.draw(fondo)
+        rect = cls.contenido.sprites()[0].chunks.draw(fondo)
         display.update(rect)
 
 

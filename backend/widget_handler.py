@@ -1,5 +1,6 @@
 from pygame.sprite import LayeredUpdates
 from pygame import event, QUIT, KEYDOWN, KEYUP, K_ESCAPE, K_UP, K_DOWN, K_LEFT, K_RIGHT
+from pygame import MOUSEMOTION
 from .eventhandler import EventHandler
 
 
@@ -20,7 +21,7 @@ class WidgetHandler:
 
     @classmethod
     def update(cls):
-        events = event.get([QUIT, KEYDOWN, KEYUP])
+        events = event.get([QUIT, KEYDOWN, KEYUP, MOUSEMOTION])
         event.clear()
         dx, dy = 0, 0
         for ev in events:
@@ -35,16 +36,19 @@ class WidgetHandler:
 
             elif ev.type == KEYDOWN:
                 if ev.key == K_UP:
-                    dy = - 100
-
-                elif ev.key == K_DOWN:
                     dy = +100
 
+                elif ev.key == K_DOWN:
+                    dy = -100
+
                 elif ev.key == K_LEFT:
-                    dx = -100
+                    dx = +100
 
                 elif ev.key == K_RIGHT:
-                    dx = +100
+                    dx = -100
+            elif ev.type == MOUSEMOTION:
+                if any(ev.buttons):
+                    dx, dy = ev.rel
 
         if dx or dy:
             for widget in cls.contenido.sprites():

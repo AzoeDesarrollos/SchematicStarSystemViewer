@@ -1,22 +1,23 @@
 from .widgets.basewidget import BaseWidget
 from backend.contants import WIDTH, HEIGHT
-from pygame import image, Rect
+from pygame.sprite import LayeredUpdates
+from pygame import image, Surface
+from random import choice
 from os.path import join
 from os import getcwd
 
 
 class Background(BaseWidget):
-    sub_right = None
-    sub_left = None
-    sub_top = None
-    sub_bottom = None
+    layer = 0
     chunk_x = 0
     chunk_y = 0
 
     def __init__(self, parent=None):
         self.image_base = image.load(join(getcwd(), 'data', 'estrellas.png'))
-        self.image = image.load(join(getcwd(), 'data', 'estrellas.png'))
-        self.rect = self.image.get_rect()
+        imagen = image.load(join(getcwd(), 'data', 'estrellas.png'))
+        chunk = Chunk(self, imagen)
+        self.chunks = LayeredUpdates(chunk)
+
         super().__init__(parent)
         self.show()
 
@@ -24,51 +25,44 @@ class Background(BaseWidget):
         return 'Star Bg'
 
     def move(self, dx=0, dy=0):
-        self.rect.move_ip(dx, dy)
-        px, py = 0, 0
-        r = None
-        if 0 < self.rect.x or self.rect.x <= -3500:
-            self.chunk_x += dx
-            if self.chunk_x > 0:
-                x = self.image_base.get_width() - self.chunk_x
-                px = dx
-                r = Rect(x, 0, abs(dx), self.rect.h)
+        if dx < 0:
+            if not self.chunks.get_sprites_at([WIDTH, 0]):
+                chunk_image = self.select_chunk(width=dx)
+                self.chunks.add(Chunk(self, chunk_image, right=WIDTH))
+        if dx > 0:
+            if not self.chunks.get_sprites_at([-dx, 0]):
+                chunk_image = self.select_chunk(width=dx)
+                self.chunks.add(Chunk(self, chunk_image, left=0))
+        if dy < 0:
+            if not self.chunks.get_sprites_at([0, HEIGHT]):
+                chunk_image = self.select_chunk(height=dy)
+                self.chunks.add(Chunk(self, chunk_image, bottom=HEIGHT))
+        if dy > 0:
+            if not self.chunks.get_sprites_at([0, -dy]):
+                chunk_image = self.select_chunk(height=dy)
+                self.chunks.add(Chunk(self, chunk_image, top=0))
 
-            elif self.chunk_x < 0:
-                px = WIDTH
-                r = Rect(-self.chunk_x, 0, abs(dx), self.rect.h)
+    def select_chunk(self, width=WIDTH, height=HEIGHT):
+        w = abs(width)
+        h = abs(height)
+        choices_h = [self.image_base.subsurface(i, 0, w, h) for i in range(0, WIDTH, w)]
+        choices_v = [self.image_base.subsurface(0, i, w, h) for i in range(0, HEIGHT, h)]
+        chosen = None
+        if width != WIDTH:
+            chosen = choice(choices_h)
+        elif height != HEIGHT:
+            chosen = choice(choices_v)
 
-        elif 0 > self.rect.y or self.rect.bottom >= 600:
-            self.chunk_y += dy
-            if self.chunk_y > 0:
-                y = self.image_base.get_height() - self.chunk_y
-                py = 0
-                r = Rect(0, y, self.rect.w, abs(dy))
-
-            elif self.chunk_y < 0:
-                y = -self.chunk_y
-                py = HEIGHT
-                r = Rect(0, y, self.rect.w, abs(dy))
-
-        try:
-            img = self.image_base.subsurface(r).copy()
-        except ValueError:
-            self.chunk_x = 0
-            self.chunk_y = 0
-            if dx != 0:
-                r = Rect(0, 0, abs(dx), self.rect.h)
-            elif dy != 0:
-                r = Rect(0, 0, self.rect.w, abs(dy))
-            img = self.image_base.subsurface(r).copy()
-
-        Chunk(self, img, px, py)
+        return chosen
 
 
 class Chunk(BaseWidget):
-    def __init__(self, parent, img, x, y):
+    def __init__(self, parent, img, **kwargs):
         super().__init__(parent)
-        self.image = img
-        self.rect = self.image.get_rect(topleft=(x, y))
+        imag = Surface(img.get_rect().size)
+        imag.blit(img, (0, 0))
+        self.image = imag
+        self.rect = self.image.get_rect(**kwargs)
         self.show()
 
     def move(self, dx, dy):
