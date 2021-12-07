@@ -1,8 +1,8 @@
+from backend import WIDTH, HEIGHT, WidgetHandler, Renderer
 from .widgets.basewidget import BaseWidget
-from backend.contants import WIDTH, HEIGHT
 from pygame.sprite import LayeredUpdates
-from pygame import image, Surface
 from random import choice
+from pygame import image
 from os.path import join
 from os import getcwd
 
@@ -19,34 +19,47 @@ class Background(BaseWidget):
         self.chunks = LayeredUpdates(chunk)
 
         super().__init__(parent)
-        self.show()
+        WidgetHandler.add_widget(self)
 
     def __repr__(self):
         return 'Star Bg'
 
     def move(self, dx=0, dy=0):
+        self.purge()
         if dx < 0:
-            # if not self.chunks.get_sprites_at([WIDTH, 0]):
             chunk_image = self.select_chunk(width=dx)
             self.chunks.add(Chunk(self, chunk_image, right=WIDTH))
         if dx > 0:
-            # if not self.chunks.get_sprites_at([-dx, 0]):
             chunk_image = self.select_chunk(width=dx)
             self.chunks.add(Chunk(self, chunk_image, left=0))
         if dy < 0:
-            # if not self.chunks.get_sprites_at([0, HEIGHT]):
             chunk_image = self.select_chunk(height=dy)
             self.chunks.add(Chunk(self, chunk_image, bottom=HEIGHT))
         if dy > 0:
-            # if not self.chunks.get_sprites_at([0, -dy]):
             chunk_image = self.select_chunk(height=dy)
             self.chunks.add(Chunk(self, chunk_image, top=0))
 
+    def purge(self):
+        for chunk in self.chunks.sprites():
+            if not Renderer.contains(chunk):
+                chunk.kill()
+
     def select_chunk(self, width=WIDTH, height=HEIGHT):
-        w = abs(width)
-        h = abs(height)
-        choices_h = [self.image_base.subsurface(i, 0, w, h) for i in range(0, WIDTH, w)]
-        choices_v = [self.image_base.subsurface(0, i, w, h) for i in range(0, HEIGHT, h)]
+
+        w, h = round(abs(width)), round(abs(height))
+        choices_v, choices_h = [], []
+        for i in range(0, WIDTH, w):
+            try:
+                choices_h.append(self.image_base.subsurface(i, 0, w, h))
+            except ValueError:
+                pass
+
+        for i in range(0, HEIGHT, h):
+            try:
+                choices_v.append(self.image_base.subsurface(0, i, w, h))
+            except ValueError:
+                pass
+
         chosen = None
         if width != WIDTH:
             chosen = choice(choices_h)
@@ -59,9 +72,7 @@ class Background(BaseWidget):
 class Chunk(BaseWidget):
     def __init__(self, parent, img, **kwargs):
         super().__init__(parent)
-        imag = Surface(img.get_rect().size)
-        imag.blit(img, (0, 0))
-        self.image = imag
+        self.image = img
         self.rect = self.image.get_rect(**kwargs)
         self.show()
 
